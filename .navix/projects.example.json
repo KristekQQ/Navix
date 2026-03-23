@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "projects": {
+    "sfxhotswap": {
+      "alias": "sfxHotswap",
+      "path": "../SFX-HotSwap",
+      "webPath": "sfx",
+      "webTarget": "http://127.0.0.1:4173"
+    },
+    "docs": {
+      "alias": "docs",
+      "webPath": "docs",
+      "webTarget": "http://127.0.0.1:3000"
+    }
+  }
+}

@@ -15,8 +15,8 @@ node index.js serve [port]
 
 ## Chovani
 
-- Doporuceny rucne editovatelny config je `./navix.json`.
-- Pri cteni se jako fallback bere i stary `./.navix/projects.json`, ale dalsi zapis jde do `./navix.json`.
+- Hlavni rucne editovatelny config je `./.navix/projects.json`.
+- V repu muze byt verzovany vzor `./.navix/projects.example.json`, aby bylo hned jasne, kam config patri.
 - Alias je case-insensitive pro lookup a musi odpovidat `[A-Za-z0-9_-]`.
 - Relativni cesty se pri `add` ukladaji relativne k rootu Navix projektu, takze jsou prenositelnejsi mezi checkouty.
 - `path` je volitelna pro ciste webove launcher entries, takze si muzes drzet i odkazy na projekty, kde nepotrebujes `run`.
@@ -47,8 +47,9 @@ node index.js serve [port]
 }
 ```
 
+- Pro prvni setup zkopiruj `./.navix/projects.example.json` na `./.navix/projects.json` nebo pouzij `add` / `add-web`, ktere soubor vytvori samy.
 - Klic uvnitr `projects` musi byt lowercase alias.
-- `path` muze byt relativni k umisteni `navix.json` nebo absolutni, ale u web-only entry muze chybet uplne.
+- `path` muze byt relativni k umisteni `./.navix/projects.json` nebo absolutni, ale u web-only entry muze chybet uplne.
 - `webPath` a `webTarget` musis definovat oba, nebo ani jeden.
 
 ## Priklady

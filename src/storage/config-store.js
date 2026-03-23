@@ -6,17 +6,12 @@ const { createEmptyConfig, validateConfigShape } = require("./config-schema");
 const { AppError } = require("../errors/app-error");
 
 function createConfigStore(baseDir = process.cwd()) {
-  const preferredConfigPath = path.join(baseDir, "navix.json");
   const legacyConfigDir = path.join(baseDir, ".navix");
-  const legacyConfigPath = path.join(legacyConfigDir, "projects.json");
+  const preferredConfigPath = path.join(legacyConfigDir, "projects.json");
 
   function resolveConfigPath() {
     if (fs.existsSync(preferredConfigPath)) {
       return preferredConfigPath;
-    }
-
-    if (fs.existsSync(legacyConfigPath)) {
-      return legacyConfigPath;
     }
 
     return preferredConfigPath;
