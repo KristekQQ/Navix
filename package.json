@@ -1,0 +1,15 @@
+{
+  "name": "Navix",
+  "version": "1.0.0",
+  "description": "Simple multi-project git router CLI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.js help",
+    "serve": "node index.js serve 8080"
+  },
+  "private": true,
+  "bin": {
+    "navix": "./index.js"
+  }
+}
