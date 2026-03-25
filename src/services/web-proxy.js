@@ -67,10 +67,11 @@ function handleRequest(registry, req, res) {
       const contentType = String(proxyResponse.headers["content-type"] || "");
       const isHtml = contentType.includes("text/html");
       const isJavaScript = contentType.includes("javascript");
+      const isJson = contentType.includes("application/json");
       const isEventStream = contentType.includes("text/event-stream");
       const responseHeaders = rewriteResponseHeaders(proxyResponse.headers, project, targetUrl);
 
-      if ((!isHtml && !isJavaScript) || isEventStream) {
+      if ((!isHtml && !isJavaScript && !isJson) || isEventStream) {
         res.writeHead(proxyResponse.statusCode || 502, responseHeaders);
         proxyResponse.pipe(res);
         return;
@@ -82,7 +83,9 @@ function handleRequest(registry, req, res) {
         const body = Buffer.concat(chunks).toString("utf8");
         const rewrittenBody = isHtml
           ? injectRouteBase(rewriteHtmlRootPaths(body, project.webPath), project.webPath)
-          : rewriteJavaScriptRootPaths(body, project.webPath);
+          : isJavaScript
+            ? rewriteJavaScriptRootPaths(body, project.webPath)
+            : rewriteJsonRootPaths(body, project.webPath);
         responseHeaders["content-length"] = Buffer.byteLength(rewrittenBody);
         res.writeHead(proxyResponse.statusCode || 502, responseHeaders);
         res.end(rewrittenBody);
@@ -148,6 +151,10 @@ function rewriteJavaScriptRootPaths(source, webPath) {
 
       return `${quote}/${webPath}/${segment}/`;
     });
+}
+
+function rewriteJsonRootPaths(source, webPath) {
+  return source.replace(/":\s*"\/(?!\/|https?:)/g, `":"/${webPath}/`);
 }
 
 function injectRouteBase(html, webPath) {
@@ -235,7 +242,6 @@ function renderRouteIndex(projects) {
     ".button{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:14px;font:700 14px/1 Arial,sans-serif;text-decoration:none;transition:filter .18s ease,transform .18s ease;}",
     ".button:hover{filter:brightness(.98);transform:translateY(-1px);}",
     ".button-primary{background:#c96d47;color:#fff8f3;}",
-    ".button-secondary{background:#ebe1d3;color:#332922;}",
     ".footer{margin-top:28px;font:500 13px/1.7 Arial,sans-serif;color:#675b51;}",
     ".empty{padding:30px;border-radius:24px;background:rgba(255,252,247,.78);border:1px dashed rgba(60,42,24,.18);font:500 16px/1.7 Arial,sans-serif;color:#5c534c;}",
     "@media (max-width:820px){.hero{grid-template-columns:1fr;}h1{font-size:clamp(2.8rem,16vw,4.4rem);}.card h2{font-size:28px;}}",
@@ -248,7 +254,7 @@ function renderRouteIndex(projects) {
     "<div>",
     '<p class="eyebrow">Local Project Router</p>',
     "<h1>Navix</h1>",
-    '<p class="intro">Jedno místo pro lokální nástroje, dev servery a rychlé přepínání mezi projekty. Otevři route přes proxy, nebo skoč rovnou na cílový port.</p>',
+    '<p class="intro">Jedno místo pro lokální nástroje, dev servery a rychlé přepínání mezi projekty. Každá karta tě vede přes Navix proxy, takže nemusíš řešit interní porty ani lokální target URL.</p>',
     "</div>",
     '<aside class="hero-card">',
     `<div class="hero-stat"><span>Active routes</span><strong>${projects.length}</strong></div>`,
@@ -257,7 +263,7 @@ function renderRouteIndex(projects) {
     "</aside>",
     "</section>",
     `<section class="grid">${cards}</section>`,
-    '<p class="footer">Tip: primární tlačítko otevírá route přes Navix proxy. Sekundární odkaz vede přímo na cílový lokální server.</p>',
+    '<p class="footer">Tip: všechny projekty otevírej přes Navix proxy. Rozcestník schválně neukazuje přímé interní targety, aby zůstal čistý a přenosný.</p>',
     "</div>",
     "</main>",
     "</body>",
@@ -275,14 +281,12 @@ function renderProjectCard(project) {
     `<h2>${escapeHtml(project.alias)}</h2>`,
     '<div class="meta">',
     `<div><span class="meta-label">Proxy Route</span><strong>/${escapeHtml(project.webPath)}/</strong></div>`,
-    `<div><span class="meta-label">Target URL</span><span>${escapeHtml(project.webTarget)}</span></div>`,
     project.path
       ? `<div><span class="meta-label">Local Path</span><span>${escapeHtml(project.path)}</span></div>`
       : "",
     "</div>",
     '<div class="actions">',
     `<a class="button button-primary" href="/${encodeURIComponent(project.webPath)}/">Open Through Navix</a>`,
-    `<a class="button button-secondary" href="${escapeAttribute(project.webTarget)}">Open Direct</a>`,
     "</div>",
     "</article>",
   ].join("");
@@ -299,10 +303,6 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function escapeAttribute(value) {
-  return escapeHtml(value);
 }
 
 module.exports = {
