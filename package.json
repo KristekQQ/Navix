@@ -5,6 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "start-workspace": "scripts\\start-workspace.bat",
+    "start-workspace:linux": "bash ./scripts/start-workspace.sh",
+    "stop-workspace": "scripts\\stop-workspace.bat",
+    "stop-workspace:linux": "bash ./scripts/stop-workspace.sh",
+    "sync-projects": "scripts\\sync-projects.bat",
+    "sync-projects:linux": "bash ./scripts/sync-projects.sh",
     "test": "node index.js help",
     "serve": "node index.js serve 8080"
   },
